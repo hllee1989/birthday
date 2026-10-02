@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사랑하는 엄마 아빠에게 - 하림</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- 감성 한글 웹폰트 (마루 부리) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10-21@1.0/MaruBuri.css">
+  
+  <style>
+    body {
+      font-family: 'Maru Buri', -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-letter {
+      font-family: 'Maru Buri', serif;
+      line-height: 1.85;
+    }
+    /* 감성 피아노 부드러운 펄스 애니메이션 */
+    @keyframes musicPulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.06); opacity: 1; }
+    }
+    .music-active {
+      animation: musicPulse 2.4s ease-in-out infinite;
+    }
+    .slider-track {
+      display: flex;
+      transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    /* 오답 시 카드 흔들림 애니메이션 */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .shake-animation {
+      animation: shake 0.5s ease-in-out;
+    }
+    /* 커스텀 스크롤바 */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #fdf2f4;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #f43f5e;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-rose-50/40 text-slate-800 min-h-screen flex flex-col justify-between antialiased selection:bg-rose-200">
+
+  <!-- 메인 모바일 우선 컨테이너 -->
+  <div class="w-full max-w-md mx-auto min-h-screen flex flex-col bg-white shadow-2xl relative">
+    
+    <!-- 상단 헤더 -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-rose-100 px-5 py-3.5 flex items-center justify-between shadow-xs">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">🌸</span>
+        <h1 class="text-base font-bold text-rose-900 tracking-tight">사랑해요 엄마, 아빠</h1>
+      </div>
+      
+      <!-- 상단 컨트롤 버튼 (BGM 및 QR) -->
+      <div class="flex items-center gap-2">
+        <button id="bgmToggleBtn" onclick="toggleBgm()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-rose-50 hover:bg-rose-100 text-rose-700 shadow-xs border border-rose-200 transition-all active:scale-95" title="배경음악 켜기/끄기">
+          <span id="bgmIcon">🎹</span>
+          <span id="bgmText">피아노 켜기</span>
+        </button>
+        <button onclick="openQrModal()" class="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium bg-stone-50 hover:bg-stone-100 text-slate-700 shadow-xs border border-stone-200 transition-all active:scale-95" title="페이지 QR 및 공유">
+          <span>📱</span>
+          <span>공유</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 메인 컨텐츠 영역 -->
+    <main class="flex-1 p-5 overflow-y-auto">
+      
+      <!-- 1단계: 방문자 이름 입력 화면 -->
+      <section id="stepIntro" class="flex flex-col items-center justify-center min-h-[70vh] text-center">
+        <div class="w-20 h-20 bg-rose-100 rounded-full flex items-center justify-center text-4xl mb-4 shadow-inner">
+          💌
+        </div>
+        <span class="text-xs font-semibold text-rose-500 uppercase tracking-widest bg-rose-50 px-3 py-1 rounded-full border border-rose-100 mb-2">하림이의 특별한 생일 선물</span>
+        <h2 class="text-2xl font-bold text-slate-800 mb-2 leading-tight">사랑하는 우리 가족에게</h2>
+        <p class="text-sm text-slate-600 mb-8 max-w-xs leading-relaxed">
+          방문하신 분의 이름을 적어주세요.<br>하림이가 준비한 퀴즈와 진심 어린 편지가 기다리고 있어요.
+        </p>
+
+        <!-- 호칭 빠른 선택 칩 -->
+        <div class="w-full max-w-xs mb-3">
+          <div class="text-xs text-stone-500 mb-2 text-left font-medium">선택하거나 직접 적어주세요:</div>
+          <div class="flex items-center justify-center gap-2">
+            <button onclick="selectVisitorRole('엄마')" class="flex-1 py-2 rounded-xl text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-all active:scale-95">🌸 엄마</button>
+            <button onclick="selectVisitorRole('아빠')" class="flex-1 py-2 rounded-xl text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition-all active:scale-95">⭐ 아빠</button>
+            <button onclick="selectVisitorRole('가족')" class="flex-1 py-2 rounded-xl text-xs font-semibold bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 transition-all active:scale-95">🌷 가족</button>
+          </div>
+        </div>
+
+        <!-- 직접 입력 인풋 -->
+        <div class="w-full max-w-xs mb-6">
+          <input type="text" id="visitorNameInput" placeholder="예: 엄마, 아빠" maxlength="15" class="w-full px-4 py-3.5 rounded-xl border border-stone-300 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-rose-400 text-center font-medium placeholder:text-stone-400 text-sm shadow-xs transition-all">
+        </div>
+
+        <button onclick="startAppFlow()" class="w-full max-w-xs py-3.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-lg shadow-rose-200 active:scale-98 transition-all flex items-center justify-center gap-2">
+          <span>추억 퀴즈 시작하기</span>
+          <span>🎁</span>
+        </button>
+      </section>
+
+      <!-- 2단계: 동적 퀴즈 시스템 -->
+      <section id="stepQuiz" class="hidden">
+        <!-- 상단 진행도 바 -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between text-xs text-stone-500 mb-1.5 font-medium">
+            <span>하림이의 추억 퀴즈</span>
+            <span id="quizProgressText" class="text-rose-600 font-bold">1 / 5</span>
+          </div>
+          <div class="w-full bg-stone-100 h-2 rounded-full overflow-hidden">
+            <div id="quizProgressBar" class="bg-rose-500 h-full w-1/5 transition-all duration-300"></div>
+          </div>
+        </div>
+
+        <!-- 퀴즈 문항 카드 -->
+        <div id="quizCard" class="bg-white rounded-2xl border border-rose-100 p-6 shadow-sm mb-6 transition-all">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-600 text-xs font-bold flex items-center justify-center" id="quizNumberBadge">Q1</span>
+            <span class="text-xs font-semibold text-rose-500">기억해 주세요</span>
+          </div>
+          <h3 id="quizQuestion" class="text-lg font-bold text-slate-800 leading-snug mb-5">
+            제가 태어난 날은 언제일까요?
+          </h3>
+
+          <!-- 객관식 보기 리스트 -->
+          <div id="quizOptions" class="space-y-2.5">
+            <!-- JavaScript로 동적 렌더링 -->
+          </div>
+
+          <!-- 힌트 및 피드백 메시지 박스 -->
+          <div id="quizFeedback" class="hidden mt-4 p-3 rounded-xl text-xs font-medium border text-left"></div>
+        </div>
+      </section>
+
+      <!-- 3단계: 사진 갤러리 및 편지 & 질문지 -->
+      <section id="stepLetterAndQuestions" class="hidden">
+        
+        <!-- 갤러리 섹션 -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-2 px-1">
+            <h3 class="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
+              <span>📷</span>
+              <span>함께한 소중한 순간들</span>
+            </h3>
+            <span class="text-xs font-medium text-rose-500 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-100" id="photoCounter">1 / 12</span>
+          </div>
+
+          <!-- 사진 업로드 원터치 도우미 바 -->
+          <div class="mb-2 bg-rose-50/80 border border-dashed border-rose-300 rounded-xl p-3 flex items-center justify-between gap-2 shadow-xs">
+            <div class="text-[12px] text-slate-700 leading-tight">
+              <span class="font-bold text-rose-600">💡 사진이 안 보이나요?</span><br>
+              사진 12장을 한 번에 선택하시면 바로 뜹니다.
+            </div>
+            <label class="shrink-0 cursor-pointer inline-flex items-center gap-1 bg-white hover:bg-rose-50 text-rose-600 text-xs font-bold px-3 py-1.5 rounded-lg border border-rose-300 shadow-xs active:scale-95 transition-all">
+              <span>📁 사진 12장 넣기</span>
+              <input type="file" id="photoBatchInput" multiple accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+            </label>
+          </div>
+
+          <!-- 슬라이더 컨테이너 -->
+          <div class="relative bg-stone-950 rounded-2xl overflow-hidden shadow-md aspect-[4/3] flex flex-col justify-end">
+            <div class="slider-track h-full w-full absolute inset-0" id="sliderTrack">
+              <!-- JS로 슬라이드 렌더링 -->
+            </div>
+
+            <!-- 슬라이더 좌우 조작 버튼 -->
+            <button onclick="prevSlide()" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center z-10 transition-all active:scale-90" aria-label="이전 사진">
+              ‹
+            </button>
+            <button onclick="nextSlide()" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center z-10 transition-all active:scale-90" aria-label="다음 사진">
+              ›
+            </button>
+
+            <!-- 캡션 바 (하단) -->
+            <div class="relative z-10 bg-gradient-to-t from-black/85 via-black/50 to-transparent p-3 text-center pointer-events-none">
+              <p id="sliderCaption" class="text-xs text-white/95 font-medium leading-relaxed drop-shadow-sm">
+                소중한 사진
+              </p>
+            </div>
+          </div>
+
+          <!-- 슬라이더 인디케이터 점들 -->
+          <div class="flex items-center justify-center gap-1.5 mt-2.5" id="sliderDots"></div>
+        </div>
+
+        <!-- 하림이의 편지 카드 -->
+        <article class="bg-[#fffdfa] rounded-2xl border border-rose-200/90 p-6 shadow-sm mb-8 relative overflow-hidden">
+          <div class="absolute -right-4 -bottom-4 text-7xl opacity-5 select-none pointer-events-none">✉️</div>
+          <div class="border-b border-rose-100 pb-3 mb-4 flex items-center justify-between">
+            <span class="text-xs font-semibold text-rose-500 bg-rose-50 px-2.5 py-1 rounded-full">하림이의 진심</span>
+            <span class="text-xs text-stone-400">결혼 후 첫 생일에</span>
+          </div>
+
+          <div class="font-letter text-slate-800 text-[14.5px] whitespace-pre-line leading-[2.1] tracking-normal select-text">
+이 세상 그 무엇보다 사랑하는 엄마, 아빠! 저 하림이에요.
+
+결혼하고 처음으로 맞는 생일이에요. 결혼을 하고 나니 신기하게도 왜 이렇게 부모님 생각이 더 많이 나고, 함께 보내고 싶은 마음이 드는지 모르겠어요. 사랑하는 엄마, 아빠 그리고 평생을 함께할 신랑과 함께할 수 있어서 더할 나위 없이 기쁘고 감사한 생일입니다.
+
+앞으로 수많은 인생의 순간들을 마주하겠지만, 저에게 이번 결혼은 정말 큰 인생의 전환점인 것 같아요. 매일이 벅차게 행복하면서도, 한편으로는 어른으로서 짊어져야 할 무게와 책임감이 문득 두렵게 다가오기도 하더라고요. 온전히 자립해야 한다는 부담감에 마음이 작아질 때도 있고요.
+
+그런데 그럴 때마다 엄마, 아빠와의 대화가 저에게 얼마나 큰 힘과 위로가 되었는지 몰라요. 두 분은 어떻게 이 긴 세월을 그토록 지혜롭고 멋지게 해내셨을까 감탄하게 되고, 제가 닮아가고 싶은 든든한 롤모델이 있다는 사실 자체가 제게 큰 용기가 돼요. ‘나도 우리 멋진 엄마, 아빠의 딸이니까 씩씩하게 잘 해낼 수 있다!’ 하면서요.
+
+엄마, 아빠. 매년 고백하는 것 같지만, 제가 두 분의 딸로 태어났다는 사실이 제 인생 최고의 축복이자 행복이에요. 이런 귀한 선물을 주신 하나님께 참 감사드립니다. 제가 부모님을 얼마나 깊이 존경하고 자랑스러워하는지 아시죠?
+
+언제나 건강하고 평안하시기를 매 순간 기도해요. 두 분께 평생 넘치도록 받은 그 큰 사랑, 살아가면서 차근차근 보답할 수 있도록 오래오래 저희 곁을 지켜주세요.
+엄마, 아빠처럼 서로 아끼고 배려하며 예쁘게 잘 살아갈게요. 정말 많이 사랑합니다!
+
+– 엄마아빠의 영원한 이쁜 딸 하림 올림
+          </div>
+        </article>
+
+        <!-- 감동 질문지 섹션 -->
+        <div class="bg-white rounded-2xl border border-rose-100 p-6 shadow-sm mb-6">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-lg">💭</span>
+            <h3 class="text-base font-bold text-slate-800">
+              <span id="questionFormAuthor" class="text-rose-600">엄마, 아빠</span>의 마음을 들려주세요
+            </h3>
+          </div>
+          <p class="text-xs text-stone-500 mb-5 leading-relaxed">
+            하림이가 태어났을 때부터 지금까지 간직해오신 소중한 마음을 남겨주시면 평생 마음에 담아둘게요.
+          </p>
+
+          <form id="memoryForm" onsubmit="handleMemorySubmit(event)" class="space-y-4">
+            <!-- 질문 1 -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5 leading-snug">
+                1. 하림이가 태어났을 때 기분이 어떠셨나요? 👶
+              </label>
+              <textarea id="answer1" rows="3" placeholder="예: 세상에 태어나 처음 마주했던 그 순간, 말로 다 표현 못 할 만큼 벅차고 감사했단다..." class="w-full p-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-rose-400 text-xs text-slate-700 leading-relaxed placeholder:text-stone-300 transition-all"></textarea>
+            </div>
+
+            <!-- 질문 2 -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5 leading-snug">
+                2. 나에게 하림이란 어떤 존재인가요? 🌟
+              </label>
+              <textarea id="answer2" rows="3" placeholder="예: 우리 집의 가장 큰 기쁨이자, 언제 보아도 사랑스러운 둘도 없는 보물이지..." class="w-full p-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-rose-400 text-xs text-slate-700 leading-relaxed placeholder:text-stone-300 transition-all"></textarea>
+            </div>
+
+            <!-- 질문 3 -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5 leading-snug">
+                3. 하림이가 내 딸이어서 가장 행복했던 순간은 언제인가요? 🌸
+              </label>
+              <textarea id="answer3" rows="3" placeholder="예: 밝게 웃으며 조잘조잘 하루 일과를 들려줄 때, 그리고 예쁘고 씩씩하게 자라준 매 순간순간..." class="w-full p-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-rose-400 text-xs text-slate-700 leading-relaxed placeholder:text-stone-300 transition-all"></textarea>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-sm shadow-md shadow-rose-200 active:scale-98 transition-all flex items-center justify-center gap-1.5 mt-2">
+              <span>하림이에게 마음 전하기</span>
+              <span>💌</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- 실시간 추억 보관소 목록 섹션 -->
+        <div class="mt-8 border-t border-rose-100 pt-6">
+          <div class="flex items-center justify-between mb-3 px-1">
+            <h4 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+              <span>💎</span>
+              <span>우리 가족 마음 보관소</span>
+            </h4>
+            <span id="memoriesBadge" class="text-xs text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full font-semibold border border-rose-100">0개의 이야기</span>
+          </div>
+
+          <div id="memoriesList" class="space-y-4">
+            <!-- JavaScript로 동적 렌더링 -->
+          </div>
+        </div>
+
+        <!-- 하단 공유 및 다른 가족 참여 버튼 -->
+        <div class="mt-8 p-4 bg-rose-50/70 rounded-2xl border border-rose-100 text-center flex flex-col items-center gap-2.5">
+          <p class="text-xs text-stone-600">다른 가족 분들도 이 기기에서 소중한 마음을 남기실 수 있어요.</p>
+          <div class="flex items-center gap-2">
+            <button onclick="resetForNewVisitor()" class="px-3.5 py-2 rounded-xl bg-white hover:bg-rose-100 text-rose-700 text-xs font-semibold border border-rose-200 shadow-xs transition-all active:scale-95">
+              ✏️ 다른 이름으로 작성하기
+            </button>
+            <button onclick="copyCurrentUrl()" class="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition-all active:scale-95">
+              🔗 링크 복사
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- QR 코드 공유 모달 -->
+    <div id="qrModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-xs w-full p-6 text-center shadow-2xl border border-rose-100 animate-in fade-in zoom-in duration-200">
+        <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center text-xl mx-auto mb-3">
+          📱
+        </div>
+        <h4 class="text-base font-bold text-slate-800 mb-1">우리 가족과 함께 보기</h4>
+        <p class="text-xs text-stone-500 mb-4 leading-relaxed">
+          스마트폰 기본 카메라로 비추시면<br>즉시 이 페이지가 열립니다.
+        </p>
+        
+        <!-- QR 이미지 -->
+        <div class="bg-stone-50 p-3 rounded-2xl border border-stone-200 inline-block mb-4 shadow-inner">
+          <img id="qrImageElement" src="" alt="QR 코드" class="w-40 h-40 object-contain mx-auto rounded-lg">
+        </div>
+
+        <div class="space-y-2">
+          <button onclick="copyCurrentUrl()" class="w-full py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold shadow-xs active:scale-98 transition-all">
+            🔗 링크 주소 복사하기
+          </button>
+          <button onclick="closeQrModal()" class="w-full py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-slate-600 text-xs font-medium transition-all">
+            닫기
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 맞춤형 알림 토스트 UI -->
+    <div id="customToast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 text-white px-4 py-2.5 rounded-full text-xs font-medium shadow-xl backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2 max-w-[90vw]">
+      <span id="toastIcon">🌸</span>
+      <span id="toastMsg">알림 메시지</span>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="py-4 text-center border-t border-rose-50 text-[11px] text-stone-400 bg-white">
+      언제나 사랑과 감사를 담아 · 하림 올림
+    </footer>
+
+  </div>
+
+  <script>
+    /* =========================================================================
+       1. CONFIG: 하림 님의 맞춤 퀴즈, 사진 12장, 편지 데이터
+       ========================================================================= */
+    const CONFIG = {
+      child: {
+        name: "하림",
+        photos: [
+          {
+            key: "남매 사진스캔0003.jpg",
+            url: "남매 사진스캔0003.jpg",
+            caption: "1997년 11월 7일, 두 오빠와 함께했던 갓난아기 시절"
+          },
+          {
+            key: "IMG_0127.jpg",
+            url: "IMG_0127.jpg",
+            caption: "곱게 분홍색 한복을 입었던 날"
+          },
+          {
+            key: "남매 사진스캔0055.jpg",
+            url: "남매 사진스캔0055.jpg",
+            caption: "1998년 5월 25일, 장난감 자전거를 타고 두 오빠와 함께"
+          },
+          {
+            key: "고성능0042.jpg",
+            url: "고성능0042.jpg",
+            caption: "친할머니와 외할머니, 부모님, 두 오빠까지 온 가족이 잔디밭에 모여 앉았던 날"
+          },
+          {
+            key: "2000스키장0013.jpg",
+            url: "2000스키장0013.jpg",
+            caption: "2000년 새해 첫날, 엄마 등에 업혀 함께 갔던 스키장"
+          },
+          {
+            key: "미분류0014.jpg",
+            url: "미분류0014.jpg",
+            caption: "2000년 8월 10일 여름밤, 두 오빠와 나란히 서서"
+          },
+          {
+            key: "010800경 가족0032.jpg",
+            url: "010800경 가족0032.jpg",
+            caption: "아빠 귀에 귓속말을 하던 다정한 순간"
+          },
+          {
+            key: "2002경지리산온천0001.jpg",
+            url: "2002경지리산온천0001.jpg",
+            caption: "2002년 지리산 온천에서 아빠와 함께"
+          },
+          {
+            key: "2002경지리산온천0012.jpg",
+            url: "2002경지리산온천0012.jpg",
+            caption: "2002년 지리산 온천에서 엄마와 함께"
+          },
+          {
+            key: "고성능0007.jpg",
+            url: "고성능0007.jpg",
+            caption: "작은 들꽃을 손에 쥐고 엄마, 아빠와 함께 웃던 날"
+          },
+          {
+            key: "HL발표회0033.jpg",
+            url: "HL발표회0033.jpg",
+            caption: "2003년 6월 19일, 유치원 발표회 날 엄마 아빠와 함께"
+          },
+          {
+            key: "0507태국 캄보디아0022.jpg",
+            url: "0507태국 캄보디아0022.jpg",
+            caption: "2005년 7월 23일, 엄마와 함께 코끼리를 타고 즐거웠던 여행"
+          }
+        ]
+      },
+      quizzes: [
+        {
+          id: 1,
+          question: "제가 태어난 날은 언제일까요?",
+          options: ["8월 15일", "10월 7일", "11월 12일", "12월 25일"],
+          correctIndex: 1,
+          hint: "선선하고 맑은 가을날, 10월 7일이랍니다 🍂"
+        },
+        {
+          id: 2,
+          question: "제가 태어난 곳은 어느 지역일까요?",
+          options: ["서울", "대전", "충주", "부산"],
+          correctIndex: 2,
+          hint: "아름다운 남한강이 흐르는 충주예요 🏞️"
+        },
+        {
+          id: 3,
+          question: "이곳에 가게 된 걸 정말 큰 복으로 생각해요. 행복했고 보내주신 부모님께 감사한 이곳은 어딜까요?",
+          options: ["미국과 캐나다", "뉴질랜드와 호주", "영국과 프랑스", "스위스와 오스트리아"],
+          correctIndex: 1,
+          hint: "대자연이 아름다웠던 남반구의 뉴질랜드와 호주예요 ✈️"
+        },
+        {
+          id: 4,
+          question: "제가 제일 사랑하는 사람은 누구일까요?",
+          options: ["연예인", "엄마, 아빠", "만화 주인공", "나 자신"],
+          correctIndex: 1,
+          hint: "세상 그 누구보다 소중한 우리 엄마, 아빠예요 ❤️"
+        },
+        {
+          id: 5,
+          question: "제 바람은 무엇일까요?",
+          options: [
+            "우리 가족 모두 건강하게 오래오래 행복한 것",
+            "로또 1등에 당첨되는 것",
+            "세계 일주만 계속 다니는 것",
+            "유명한 인플루언서가 되는 것"
+          ],
+          correctIndex: 0,
+          hint: "우리 가족 모두가 아프지 않고 오래오래 함께 웃는 것이에요 🌸"
+        }
+      ]
+    };
+
+    /* 앱 상태 관리 */
+    const state = {
+      visitorRole: "",
+      currentQuizIdx: 0,
+      currentPhotoIndex: 0,
+      memories: []
+    };
+
+    /* Web Audio API 기반 지브리풍 서정적 어쿠스틱 피아노 연주기 */
+    const GhibliPiano = {
+      ctx: null,
+      isPlaying: false,
+      timer: null,
+      step: 0,
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === "suspended") {
+          this.ctx.resume();
+        }
+      },
+
+      playKey(freq, time, duration = 2.4, gainLevel = 0.16) {
+        if (!this.ctx) return;
+        const now = time || this.ctx.currentTime;
+
+        // 1. 기음 Triangle
+        const osc1 = this.ctx.createOscillator();
+        osc1.type = "triangle";
+        osc1.frequency.setValueAtTime(freq, now);
+
+        // 2. 부드러운 배음 Sine
+        const osc2 = this.ctx.createOscillator();
+        osc2.type = "sine";
+        osc2.frequency.setValueAtTime(freq * 2, now);
+
+        // 3. 로우패스 필터로 부드러운 어쿠스틱 피아노 음색 구현 (벨소리 전자음 방지)
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(800, now);
+        filter.frequency.exponentialRampToValueAtTime(320, now + duration);
+
+        // 4. 감쇠 엔벨로프
+        const gainNode = this.ctx.createGain();
+        gainNode.gain.setValueAtTime(0.0001, now);
+        gainNode.gain.linearRampToValueAtTime(gainLevel, now + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(gainLevel * 0.45, now + 0.35);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        const subGain = this.ctx.createGain();
+        subGain.gain.setValueAtTime(0.06, now);
+
+        osc1.connect(filter);
+        osc2.connect(subGain);
+        subGain.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.ctx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + duration);
+        osc2.stop(now + duration);
+      },
+
+      m(noteName) {
+        const notes = {
+          'C3': 130.81, 'E3': 164.81, 'G3': 196.00, 'A3': 220.00, 'B3': 246.94,
+          'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00,
+          'A4': 440.00, 'B4': 493.88, 'C5': 523.25, 'D5': 587.33, 'E5': 659.25,
+          'F5': 698.46, 'G5': 783.99, 'A5': 880.00
+        };
+        return notes[noteName] || 440;
+      },
+
+      // 지브리 왈츠 아르페지오 (Cmaj7 -> Am7 -> Em7 -> Fmaj7 -> C/E -> Dm7 -> G7)
+      loop() {
+        if (!this.isPlaying) return;
+        const now = this.ctx.currentTime;
+        const s = this.step % 8;
+
+        if (s === 0) {
+          this.playKey(this.m('C3'), now, 2.6, 0.22);
+          this.playKey(this.m('G3'), now + 0.18, 2.2, 0.14);
+          this.playKey(this.m('C4'), now + 0.36, 2.0, 0.15);
+          this.playKey(this.m('E4'), now + 0.54, 2.0, 0.16);
+          this.playKey(this.m('G4'), now + 0.72, 2.2, 0.15);
+        } else if (s === 1) {
+          this.playKey(this.m('E3'), now, 2.2, 0.18);
+          this.playKey(this.m('G3'), now + 0.20, 2.0, 0.13);
+          this.playKey(this.m('D4'), now + 0.40, 2.2, 0.15);
+          this.playKey(this.m('C4'), now + 0.65, 2.0, 0.14);
+        } else if (s === 2) {
+          this.playKey(this.m('A3'), now, 2.6, 0.20);
+          this.playKey(this.m('E4'), now + 0.18, 2.2, 0.14);
+          this.playKey(this.m('A4'), now + 0.36, 2.2, 0.15);
+          this.playKey(this.m('C5'), now + 0.54, 2.4, 0.16);
+        } else if (s === 3) {
+          this.playKey(this.m('E3'), now, 2.6, 0.20);
+          this.playKey(this.m('B3'), now + 0.20, 2.0, 0.14);
+          this.playKey(this.m('G4'), now + 0.40, 2.2, 0.15);
+        } else if (s === 4) {
+          this.playKey(this.m('F3'), now, 2.6, 0.22);
+          this.playKey(this.m('C4'), now + 0.18, 2.2, 0.14);
+          this.playKey(this.m('A4'), now + 0.36, 2.2, 0.16);
+          this.playKey(this.m('C5'), now + 0.54, 2.4, 0.17);
+        } else if (s === 5) {
+          this.playKey(this.m('E3'), now, 2.4, 0.19);
+          this.playKey(this.m('G3'), now + 0.20, 2.0, 0.13);
+          this.playKey(this.m('C4'), now + 0.40, 2.0, 0.14);
+        } else if (s === 6) {
+          this.playKey(this.m('D3'), now, 2.6, 0.20);
+          this.playKey(this.m('A3'), now + 0.18, 2.0, 0.14);
+          this.playKey(this.m('F4'), now + 0.36, 2.2, 0.15);
+        } else if (s === 7) {
+          this.playKey(this.m('G3'), now, 2.6, 0.22);
+          this.playKey(this.m('D4'), now + 0.18, 2.0, 0.13);
+          this.playKey(this.m('F4'), now + 0.36, 2.0, 0.14);
+          this.playKey(this.m('B4'), now + 0.55, 2.2, 0.15);
+        }
+
+        this.step++;
+        this.timer = setTimeout(() => this.loop(), 1050);
+      },
+
+      start() {
+        this.init();
+        if (this.isPlaying) return;
+        this.isPlaying = true;
+        this.step = 0;
+        this.loop();
+        updateBgmUi(true);
+      },
+
+      stop() {
+        this.isPlaying = false;
+        if (this.timer) {
+          clearTimeout(this.timer);
+          this.timer = null;
+        }
+        updateBgmUi(false);
+      },
+
+      toggle() {
+        if (this.isPlaying) {
+          this.stop();
+        } else {
+          this.start();
+        }
+      },
+
+      playChime() {
+        this.init();
+        const now = this.ctx.currentTime;
+        this.playKey(this.m('C4'), now, 1.8, 0.16);
+        this.playKey(this.m('E4'), now + 0.08, 1.8, 0.16);
+        this.playKey(this.m('G4'), now + 0.16, 2.0, 0.18);
+        this.playKey(this.m('C5'), now + 0.24, 2.2, 0.20);
+      }
+    };
+
+    function updateBgmUi(isPlaying) {
+      const btn = document.getElementById("bgmToggleBtn");
+      const icon = document.getElementById("bgmIcon");
+      const text = document.getElementById("bgmText");
+      if (!btn) return;
+      if (isPlaying) {
+        btn.classList.add("music-active", "bg-rose-100", "border-rose-300");
+        icon.textContent = "🎵";
+        text.textContent = "피아노 끄기";
+      } else {
+        btn.classList.remove("music-active", "bg-rose-100", "border-rose-300");
+        icon.textContent = "🎹";
+        text.textContent = "피아노 켜기";
+      }
+    }
+
+    function toggleBgm() {
+      GhibliPiano.toggle();
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadSavedMemories();
+      restoreSavedPhotos();
+      renderSlider();
+      renderMemories();
+    });
+
+    function selectVisitorRole(role) {
+      document.getElementById("visitorNameInput").value = role;
+    }
+
+    function startAppFlow() {
+      const input = document.getElementById("visitorNameInput");
+      const name = (input.value || "").trim();
+
+      if (!name) {
+        showToast("방문하신 분의 성함이나 호칭을 적어주세요! 🌸", "💌");
+        input.focus();
+        return;
+      }
+
+      state.visitorRole = name;
+      document.getElementById("questionFormAuthor").textContent = name;
+
+      // 은은한 피아노 음악 시작
+      GhibliPiano.start();
+
+      // 화면 전환
+      document.getElementById("stepIntro").classList.add("hidden");
+      document.getElementById("stepQuiz").classList.remove("hidden");
+      renderCurrentQuiz();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    /* 퀴즈 렌더링 */
+    function renderCurrentQuiz() {
+      const quiz = CONFIG.quizzes[state.currentQuizIdx];
+      const total = CONFIG.quizzes.length;
+
+      document.getElementById("quizProgressText").textContent = `${state.currentQuizIdx + 1} / ${total}`;
+      document.getElementById("quizProgressBar").style.width = `${((state.currentQuizIdx + 1) / total) * 100}%`;
+      document.getElementById("quizNumberBadge").textContent = `Q${state.currentQuizIdx + 1}`;
+      document.getElementById("quizQuestion").textContent = quiz.question;
+
+      const feedback = document.getElementById("quizFeedback");
+      feedback.classList.add("hidden");
+      feedback.textContent = "";
+
+      const optionsContainer = document.getElementById("quizOptions");
+      optionsContainer.innerHTML = "";
+
+      quiz.options.forEach((optText, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "w-full p-3.5 rounded-xl border border-stone-200 hover:border-rose-300 bg-white hover:bg-rose-50/50 text-slate-700 text-xs font-semibold text-left transition-all active:scale-98 flex items-center justify-between";
+        btn.innerHTML = `
+          <span>${optText}</span>
+          <span class="text-stone-300">○</span>
+        `;
+        btn.onclick = () => handleQuizAnswer(idx, btn);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    /* 퀴즈 정답 검증 */
+    function handleQuizAnswer(selectedIndex, buttonEl) {
+      const quiz = CONFIG.quizzes[state.currentQuizIdx];
+      const card = document.getElementById("quizCard");
+      const feedback = document.getElementById("quizFeedback");
+
+      if (selectedIndex === quiz.correctIndex) {
+        // 정답 처리
+        GhibliPiano.playChime();
+        buttonEl.classList.remove("border-stone-200", "bg-white");
+        buttonEl.classList.add("border-emerald-500", "bg-emerald-50", "text-emerald-800");
+        buttonEl.querySelector("span:last-child").textContent = "✓";
+        buttonEl.querySelector("span:last-child").className = "text-emerald-600 font-bold";
+
+        feedback.className = "mt-4 p-3 rounded-xl text-xs font-semibold border bg-emerald-50 border-emerald-200 text-emerald-800 text-center";
+        feedback.innerHTML = `<span>정답입니다! 👏</span>`;
+        feedback.classList.remove("hidden");
+
+        // 컨페티
+        if (typeof confetti === "function") {
+          confetti({ particleCount: 35, spread: 50, origin: { y: 0.6 } });
+        }
+
+        setTimeout(() => {
+          if (state.currentQuizIdx < CONFIG.quizzes.length - 1) {
+            state.currentQuizIdx++;
+            renderCurrentQuiz();
+          } else {
+            // 모든 퀴즈 완료 -> 편지와 질문지 화면 오픈
+            document.getElementById("stepQuiz").classList.add("hidden");
+            document.getElementById("stepLetterAndQuestions").classList.remove("hidden");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            showToast(`${state.visitorRole}님, 하림이의 편지가 열렸어요 💌`, "🌸");
+            if (typeof confetti === "function") {
+              confetti({ particleCount: 80, spread: 80, origin: { y: 0.4 } });
+            }
+          }
+        }, 850);
+
+      } else {
+        // 오답 처리
+        card.classList.remove("shake-animation");
+        void card.offsetWidth;
+        card.classList.add("shake-animation");
+
+        buttonEl.classList.add("border-rose-400", "bg-rose-50", "text-rose-700");
+        feedback.className = "mt-4 p-3 rounded-xl text-xs font-medium border bg-amber-50 border-amber-200 text-amber-900";
+        feedback.innerHTML = `<span class="font-bold">다시 한번 기억해 보세요!</span><br>${quiz.hint}`;
+        feedback.classList.remove("hidden");
+      }
+    }
+
+    /* 갤러리 슬라이더 렌더링 */
+    function renderSlider() {
+      const track = document.getElementById("sliderTrack");
+      const dotsContainer = document.getElementById("sliderDots");
+      if (!track) return;
+
+      track.innerHTML = "";
+      dotsContainer.innerHTML = "";
+
+      CONFIG.child.photos.forEach((photo, idx) => {
+        const slide = document.createElement("div");
+        slide.className = "w-full h-full shrink-0 flex items-center justify-center bg-stone-950 relative";
+        
+        const img = document.createElement("img");
+        img.src = photo.url;
+        img.alt = photo.caption;
+        img.className = "w-full h-full object-contain select-none transition-opacity duration-300";
+        img.onerror = function() {
+          this.style.display = "none";
+          const fallback = document.createElement("div");
+          fallback.className = "w-full h-full flex flex-col items-center justify-center text-center p-4 text-rose-200 bg-stone-900";
+          fallback.innerHTML = `
+            <div class="text-3xl mb-1.5">📸</div>
+            <div class="text-xs font-medium text-rose-100 mb-1">${photo.caption}</div>
+            <div class="text-[11px] text-stone-400">상단의 [사진 12장 넣기]를 눌러 사진을 등록해주세요</div>
+          `;
+          slide.appendChild(fallback);
+        };
+        slide.appendChild(img);
+        track.appendChild(slide);
+
+        const dot = document.createElement("button");
+        dot.className = `w-2 h-2 rounded-full transition-all duration-300 ${idx === state.currentPhotoIndex ? "bg-rose-500 w-5" : "bg-stone-300"}`;
+        dot.onclick = () => goToSlide(idx);
+        dotsContainer.appendChild(dot);
+      });
+
+      updateSliderPosition();
+    }
+
+    /* 사진 일괄 업로드 처리 */
+    function handlePhotoUpload(event) {
+      const files = Array.from(event.target.files);
+      if (!files || files.length === 0) return;
+
+      let loadedCount = 0;
+      files.forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const resultUrl = e.target.result;
+          const decodedName = decodeURIComponent(file.name);
+
+          const matchedPhoto = CONFIG.child.photos.find(p => 
+            p.key === decodedName || 
+            p.key.normalize('NFC') === decodedName.normalize('NFC') ||
+            p.key.normalize('NFD') === decodedName.normalize('NFD') ||
+            decodedName.includes(p.key.replace('.jpg', ''))
+          );
+
+          if (matchedPhoto) {
+            matchedPhoto.url = resultUrl;
+          } else if (loadedCount < CONFIG.child.photos.length) {
+            CONFIG.child.photos[loadedCount].url = resultUrl;
+          }
+
+          loadedCount++;
+          if (loadedCount === files.length) {
+            try {
+              const photoDataMap = CONFIG.child.photos.map(p => ({ key: p.key, url: p.url, caption: p.caption }));
+              localStorage.setItem("harim_uploaded_photos", JSON.stringify(photoDataMap));
+            } catch (err) {
+              console.warn("Storage quota:", err);
+            }
+            renderSlider();
+            showToast("소중한 사진들이 성공적으로 등록되었습니다! 🌸", "📷");
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function restoreSavedPhotos() {
+      try {
+        const saved = localStorage.getItem("harim_uploaded_photos");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          parsed.forEach((item, idx) => {
+            if (CONFIG.child.photos[idx]) {
+              CONFIG.child.photos[idx].url = item.url;
+            }
+          });
+        }
+      } catch (e) {}
+    }
+
+    function updateSliderPosition() {
+      const track = document.getElementById("sliderTrack");
+      const caption = document.getElementById("sliderCaption");
+      const counter = document.getElementById("photoCounter");
+      const dots = document.getElementById("sliderDots")?.children;
+
+      if (!track) return;
+      track.style.transform = `translateX(-${state.currentPhotoIndex * 100}%)`;
+
+      const currentPhoto = CONFIG.child.photos[state.currentPhotoIndex];
+      if (caption && currentPhoto) {
+        caption.textContent = currentPhoto.caption;
+      }
+      if (counter) {
+        counter.textContent = `${state.currentPhotoIndex + 1} / ${CONFIG.child.photos.length}`;
+      }
+      if (dots) {
+        Array.from(dots).forEach((dot, idx) => {
+          if (idx === state.currentPhotoIndex) {
+            dot.className = "w-5 h-2 rounded-full bg-rose-500 transition-all duration-300";
+          } else {
+            dot.className = "w-2 h-2 rounded-full bg-stone-300 transition-all duration-300";
+          }
+        });
+      }
+    }
+
+    function nextSlide() {
+      state.currentPhotoIndex = (state.currentPhotoIndex + 1) % CONFIG.child.photos.length;
+      updateSliderPosition();
+    }
+
+    function prevSlide() {
+      state.currentPhotoIndex = (state.currentPhotoIndex - 1 + CONFIG.child.photos.length) % CONFIG.child.photos.length;
+      updateSliderPosition();
+    }
+
+    function goToSlide(idx) {
+      state.currentPhotoIndex = idx;
+      updateSliderPosition();
+    }
+
+    /* 감동 질문지 제출 처리 */
+    function handleMemorySubmit(event) {
+      event.preventDefault();
+      const a1 = (document.getElementById("answer1").value || "").trim();
+      const a2 = (document.getElementById("answer2").value || "").trim();
+      const a3 = (document.getElementById("answer3").value || "").trim();
+
+      if (!a1 || !a2 || !a3) {
+        showToast("하림이를 향한 세 가지 질문에 모두 마음을 담아주세요! 🌸", "✏️");
+        return;
+      }
+
+      const newEntry = {
+        id: Date.now(),
+        author: state.visitorRole || "엄마, 아빠",
+        answer1: a1,
+        answer2: a2,
+        answer3: a3,
+        date: new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })
+      };
+
+      state.memories.unshift(newEntry);
+      saveMemoriesToStorage();
+      renderMemories();
+
+      // 입력란 비우기
+      document.getElementById("memoryForm").reset();
+
+      // 축하 효과
+      if (typeof confetti === "function") {
+        confetti({ particleCount: 70, spread: 70, origin: { y: 0.7 } });
+      }
+      showToast("소중한 마음이 하림이의 보관소에 안전하게 저장되었습니다 💌", "💖");
+
+      // 보관소 위치로 스크롤
+      const archiveEl = document.getElementById("memoriesList");
+      if (archiveEl) {
+        archiveEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    function saveMemoriesToStorage() {
+      try {
+        localStorage.setItem("harim_family_memories", JSON.stringify(state.memories));
+      } catch (err) {
+        console.warn("Storage save error:", err);
+      }
+    }
+
+    function loadSavedMemories() {
+      try {
+        const saved = localStorage.getItem("harim_family_memories");
+        if (saved) {
+          state.memories = JSON.parse(saved);
+        }
+      } catch (err) {
+        state.memories = [];
+      }
+    }
+
+    /* 보관소 렌더링 */
+    function renderMemories() {
+      const container = document.getElementById("memoriesList");
+      const badge = document.getElementById("memoriesBadge");
+      if (!container) return;
+
+      container.innerHTML = "";
+      if (badge) {
+        badge.textContent = `${state.memories.length}개의 이야기`;
+      }
+
+      if (state.memories.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 bg-rose-50/40 rounded-2xl border border-dashed border-rose-200 p-6">
+            <div class="text-3xl mb-2">🌸</div>
+            <p class="text-xs font-bold text-slate-700 mb-1">아직 남겨진 이야기가 없어요</p>
+            <p class="text-[11px] text-stone-500">위 질문지에 첫 번째 소중한 추억을 적어주세요.</p>
+          </div>
+        `;
+        return;
+      }
+
+      state.memories.forEach((mem) => {
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-2xl border border-rose-100 p-5 shadow-xs transition-all";
+        card.innerHTML = `
+          <div class="flex items-center justify-between border-b border-rose-50 pb-2.5 mb-3">
+            <div class="flex items-center gap-1.5">
+              <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-600 text-xs font-bold flex items-center justify-center">💌</span>
+              <span class="text-xs font-bold text-slate-800">${mem.author}의 마음</span>
+            </div>
+            <span class="text-[11px] text-stone-400">${mem.date}</span>
+          </div>
+
+          <div class="space-y-3 text-xs leading-relaxed text-slate-700">
+            <div>
+              <div class="font-bold text-rose-700 mb-0.5">Q. 태어났을 때 기분</div>
+              <p class="bg-rose-50/50 p-2.5 rounded-xl border border-rose-100/60 whitespace-pre-line">${mem.answer1}</p>
+            </div>
+            <div>
+              <div class="font-bold text-rose-700 mb-0.5">Q. 나에게 하림이란</div>
+              <p class="bg-rose-50/50 p-2.5 rounded-xl border border-rose-100/60 whitespace-pre-line">${mem.answer2}</p>
+            </div>
+            <div>
+              <div class="font-bold text-rose-700 mb-0.5">Q. 딸이어서 가장 행복했던 순간</div>
+              <p class="bg-rose-50/50 p-2.5 rounded-xl border border-rose-100/60 whitespace-pre-line">${mem.answer3}</p>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function resetForNewVisitor() {
+      document.getElementById("visitorNameInput").value = "";
+      document.getElementById("stepLetterAndQuestions").classList.add("hidden");
+      document.getElementById("stepQuiz").classList.add("hidden");
+      document.getElementById("stepIntro").classList.remove("hidden");
+      state.currentQuizIdx = 0;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      showToast("새로운 가족 분의 이름을 입력해 주세요 🌸", "✏️");
+    }
+
+    /* 토스트 알림 도우미 */
+    let toastTimeout = null;
+    function showToast(message, icon = "🌸") {
+      const toast = document.getElementById("customToast");
+      const msgEl = document.getElementById("toastMsg");
+      const iconEl = document.getElementById("toastIcon");
+      if (!toast) return;
+
+      msgEl.textContent = message;
+      iconEl.textContent = icon;
+
+      toast.classList.remove("opacity-0", "pointer-events-none");
+      toast.classList.add("opacity-100");
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove("opacity-100");
+        toast.classList.add("opacity-0", "pointer-events-none");
+      }, 3000);
+    }
+
+    /* QR 코드 및 공유 도우미 */
+    function openQrModal() {
+      const currentUrl = window.location.href;
+      const qrImg = document.getElementById("qrImageElement");
+      if (qrImg) {
+        // 무료 QR 생성 API 연동
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(currentUrl)}`;
+      }
+      document.getElementById("qrModal").classList.remove("hidden");
+    }
+
+    function closeQrModal() {
+      document.getElementById("qrModal").classList.add("hidden");
+    }
+
+    function copyCurrentUrl() {
+      const currentUrl = window.location.href;
+      const dummyInput = document.createElement("input");
+      document.body.appendChild(dummyInput);
+      dummyInput.value = currentUrl;
+      dummyInput.select();
+      try {
+        document.execCommand("copy");
+        showToast("링크 주소가 복사되었습니다! 카톡에 붙여넣어 보세요 💌", "📋");
+      } catch (err) {
+        showToast("주소창의 링크를 복사해 주세요.", "⚠️");
+      }
+      document.body.removeChild(dummyInput);
+      closeQrModal();
+    }
+  </script>
+</body>
+</html>
